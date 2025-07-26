@@ -5,173 +5,94 @@
   <title>Vize Başvuru</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(120deg, #f0f4f7, #e2eafc);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    body { font-family:'Poppins',sans-serif;background:#f4f4f4;margin:0;padding:0; }
+    header { background:#800000;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;color:#fff; }
+    header nav { display:flex;gap:10px;align-items:center; }
+    header a { color:#fff;text-decoration:none;font-weight:bold; }
+    header a:hover { text-decoration:underline; }
+    .nav-btn { background:#4b4b4b;padding:6px 12px;border-radius:6px; }
+    .nav-btn:hover { background:#333; }
+    .logout { background:#a52a2a;padding:6px 12px;border-radius:6px; }
+    .logout:hover { background:#cc3b3b; }
+    .menu-toggle { display:none;font-size:22px;cursor:pointer; }
+    @media(max-width:700px){
+      header nav { display:none;flex-direction:column;position:absolute;top:55px;right:0;background:#800000;width:180px;padding:10px; }
+      header nav.active { display:flex; }
+      .menu-toggle { display:block; }
     }
+    .form-container { background:#fff;padding:30px;max-width:900px;margin:20px auto;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+    h2 { text-align:center;color:#800000; }
+    .section-title { font-weight:bold;margin:20px 0 10px;color:#800000; }
 
-    .form-container {
-      background: #fff;
-      padding: 30px;
-      width: 95%;
-      max-width: 1100px;
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    }
+    /* 🔹 Belgeler grid daha büyük */
+    .file-section { display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px; }
+    .file-box { border:2px dashed #bbb;background:#fafafa;padding:20px;text-align:center;border-radius:10px;cursor:pointer;transition:0.3s; }
+    .file-box:hover { border-color:#800000;background:#fdf5f5; }
+    .file-box i { font-size:28px;color:#800000;margin-bottom:6px;display:block; }
+    .file-box span { font-size:14px;color:#333; }
+    .file-box input { display:none; }
 
-    .logout-container { text-align: right; }
-    .logout-container button {
-      background: #5c6bc0;
-      color: white;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-    .logout-container button:hover { background: #3f4fa8; }
-
-    h2 { text-align: center; margin: 20px 0; color: #222; }
-    .section-title { margin: 30px 0 10px; font-size: 18px; font-weight: bold; color: #333; }
-
-    .file-uploads, .form-section {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 15px;
-    }
-
-    label { font-weight: 600; color: #333; margin-bottom: 5px; display: block; }
-
-    input[type="text"], input[type="email"], select {
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      width: 100%;
-      transition: 0.3s;
-    }
-    input:focus, select:focus { border-color: #5c6bc0; box-shadow: 0 0 5px rgba(92,107,192,0.3); }
-
-    /* 📂 Modern Dosya Yükleme Kutuları */
-    input[type="file"] {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      background: #fafafa;
-      border: 2px dashed #bbb;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    input[type="file"]:hover {
-      border-color: #5c6bc0;
-      background: #eef1ff;
-      box-shadow: 0 0 6px rgba(92,107,192,0.3);
-    }
-    input[type="file"]::-webkit-file-upload-button {
-      background: #5c6bc0;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-      font-weight: bold;
-    }
-    input[type="file"]::-webkit-file-upload-button:hover { background: #3f4fa8; }
-
-    /* 🔴 Başvur Butonu (Koyu Kırmızı) */
-    button[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      background: #800000;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      margin-top: 20px;
-    }
-    button[type="submit"]:hover { background: #a50000; }
-
-    /* 📋 Tablo */
-    table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 15px; }
-    th, td { padding: 14px; border-bottom: 1px solid #ddd; text-align: center; }
-    th { background: #f3f3f3; }
-
-    /* 🟦 Düzenle & Sil Butonları */
-    .actions { display: flex; justify-content: center; gap: 8px; }
-    .actions button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: 0.3s;
-    }
-    .edit-btn { background: #5c6bc0; color: white; }
-    .edit-btn:hover { background: #3f4fa8; }
-    .delete-btn { background: #800000; color: white; }
-    .delete-btn:hover { background: #a50000; }
+    /* 🔹 Kişisel Bilgiler grid */
+    .form-section { display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px; }
+    .form-section>div { background:#fafafa;padding:12px;border-radius:8px; }
+    input,select { width:100%;padding:10px;border:1px solid #ccc;border-radius:8px; }
+    button[type="submit"] { width:100%;background:#800000;color:#fff;padding:14px;border:none;border-radius:10px;margin-top:15px;font-size:16px; }
+    button[type="submit"]:hover { background:#a52a2a; }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <div class="logout-container">
-      <button onclick="logout()">Çıkış Yap</button>
+
+<header>
+  <div><strong>Vize Sistemi</strong></div>
+  <i class="fas fa-bars menu-toggle" onclick="document.querySelector('header nav').classList.toggle('active')"></i>
+  <nav>
+    <a href="application2.html" class="nav-btn">Başvurularım</a>
+    <a href="#" class="logout" onclick="logout()">Çıkış Yap</a>
+  </nav>
+</header>
+
+<div class="form-container">
+  <h2>Vize Başvuru Formu</h2>
+  <form id="applicationForm" enctype="multipart/form-data">
+    <div class="section-title">Belgeler</div>
+    <div class="file-section">
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Pasaport Fotoğrafı</span>
+        <input type="file" name="passport" required>
+      </label>
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Biyometrik Fotoğraf</span>
+        <input type="file" name="biometric_photo" required>
+      </label>
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Otel Rezervasyonu</span>
+        <input type="file" name="hotel_reservation" required>
+      </label>
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Uçak Bileti</span>
+        <input type="file" name="flight_ticket" required>
+      </label>
     </div>
 
-    <h2>Vize Başvuru Formu</h2>
-    <form id="applicationForm" enctype="multipart/form-data">
-      <div class="section-title">Belgeler</div>
-      <div class="file-uploads">
-        <div><label>Pasaport Fotoğrafı</label><input type="file" name="passport" required></div>
-        <div><label>Biyometrik Fotoğraf</label><input type="file" name="biometric_photo" required></div>
-        <div><label>Otel Rezervasyonu</label><input type="file" name="hotel_reservation" required></div>
-        <div><label>Uçak Bileti</label><input type="file" name="flight_ticket" required></div>
-      </div>
+    <div class="section-title">Kişisel Bilgiler</div>
+    <div class="form-section">
+      <div><label>Ad</label><input type="text" name="ad" required></div>
+      <div><label>Soyad</label><input type="text" name="soyad" required></div>
+      <div><label>Email</label><input type="email" name="email" required></div>
+      <div><label>Telefon</label><input type="text" name="telefon" required></div>
+      <div><label>Vize Tipi</label><select name="vize_tipi"><option>30 Gün</option><option>60 Gün</option></select></div>
+      <div><label>Giriş Türü</label><select name="vize_giris"><option>Tek Giriş</option><option>Çoklu Giriş</option></select></div>
+      <div><label>Express Vize</label><select name="express"><option>Hayır</option><option>Evet</option></select></div>
+      <div><label>Seyahat Sigortası</label><select name="sigorta"><option>Yok</option><option>Var</option></select></div>
+    </div>
 
-      <div class="section-title">Kişisel Bilgiler</div>
-      <div class="form-section">
-        <div><label>Ad</label><input type="text" name="ad" required></div>
-        <div><label>Soyad</label><input type="text" name="soyad" required></div>
-        <div><label>Email</label><input type="email" name="email" required></div>
-        <div><label>Telefon</label><input type="text" name="telefon" required></div>
-        <div><label>Vize Tipi</label><select name="vize_tipi"><option>30 Gün</option><option>60 Gün</option></select></div>
-        <div><label>Giriş Türü</label><select name="vize_giris"><option>Tek Giriş</option><option>Çoklu Giriş</option></select></div>
-        <div><label>Express Vize</label><select name="express"><option>Hayır</option><option>Evet</option></select></div>
-        <div><label>Seyahat Sigortası</label><select name="sigorta"><option>Yok</option><option>Var</option></select></div>
-      </div>
-      <button type="submit">Başvur</button>
-    </form>
+    <button type="submit">Başvur</button>
+  </form>
+</div>
 
-    <h2>Başvurularım</h2>
-    <table id="applicationsTable">
-      <thead>
-        <tr>
-          <th>Ad</th><th>Soyad</th><th>Email</th><th>Telefon</th><th>Vize Tipi</th><th>Giriş</th><th>İşlem</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <script src="application.js"></script>
-  <script>
-    function logout() {
-      localStorage.removeItem("token");
-      window.location.href = "index.html";
-    }
-  </script>
+<script src="application.js"></script>
+<script>
+function logout(){ localStorage.removeItem("token"); window.location.href="index.html"; }
+</script>
 </body>
 </html>

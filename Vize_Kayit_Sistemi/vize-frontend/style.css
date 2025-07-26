@@ -115,12 +115,27 @@ body, html {
   margin-top: 10px;
 }
 
-/* Responsive görünüm */
+/* ✅ Mobil görünüm için ekstra */
 @media (max-width: 768px) {
   .login-container {
     width: 90%;
+    max-width: 350px;
     padding: 25px;
+  }
+  .login-container h2 {
+    font-size: 20px;
   }
 }
 
-
+@media (max-width: 480px) {
+  .login-container {
+    width: 95%;
+    padding: 20px;
+  }
+  .login-container input,
+  .login-container button,
+  .login-container .register-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
