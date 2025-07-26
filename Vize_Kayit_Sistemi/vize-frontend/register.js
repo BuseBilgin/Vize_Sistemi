@@ -13,7 +13,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
-      url: 'http://localhost:8080/register',
+      url: 'https://vize-sistemi.onrender.com/register',
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({ name, email, password }),
@@ -22,7 +22,7 @@ $(document).ready(function () {
 
         // ✅ Kayıt sonrası otomatik login ve rol kontrolü
         $.ajax({
-          url: 'http://localhost:8080/login',
+          url: 'https://vize-sistemi.onrender.com/login',
           method: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({ email, password }),

@@ -14,7 +14,7 @@ function logout() {
 // Kullanıcı rolü bilgisi al
 function getMe() {
   const token = localStorage.getItem("token");
-  fetch("http://localhost:8080/me", {
+  fetch("https://vize-sistemi.onrender.com/me", {
     headers: { Authorization: `Bearer ${token}` },
   })
     .then((res) => res.json())
@@ -28,13 +28,13 @@ function getMe() {
 function getImageUrl(file) {
   if (!file) return "";
   const clean = file.replace(/^(\.\/)?uploads[\\/]/, "");
-  return `http://localhost:8080/uploads/${clean}`;
+  return `https://vize-sistemi.onrender.com/uploads/${clean}`;
 }
 
 // Başvuruları yükle
 function loadApplications() {
   const token = localStorage.getItem("token");
-  fetch("http://localhost:8080/applications", {
+  fetch("https://vize-sistemi.onrender.com/applications", {
     headers: { Authorization: `Bearer ${token}` },
   })
     .then((res) => res.json())
@@ -68,7 +68,7 @@ function renderApplications(apps) {
 // Kullanıcıları yükle
 function loadUsers() {
   const token = localStorage.getItem("token");
-  fetch("http://localhost:8080/users", {
+  fetch("https://vize-sistemi.onrender.com/users", {
     headers: { Authorization: `Bearer ${token}` },
   })
     .then((res) => res.json())
@@ -106,7 +106,7 @@ function renderUsers(users) {
 function deleteUser(id) {
   const token = localStorage.getItem("token");
   if (!confirm("Kullanıcı silinsin mi?")) return;
-  fetch(`http://localhost:8080/users/${id}`, {
+  fetch(`https://vize-sistemi.onrender.com/users/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   }).then((res) => {
@@ -117,7 +117,7 @@ function deleteUser(id) {
 // Kullanıcı rolü güncelle
 function updateUserRole(id, role) {
   const token = localStorage.getItem("token");
-  fetch(`http://localhost:8080/users/${id}/role`, {
+  fetch(`https://vize-sistemi.onrender.com/users/${id}/role`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -132,7 +132,7 @@ function updateUserRole(id, role) {
 // Logları yükle
 function loadLogs() {
   const token = localStorage.getItem("token");
-  fetch("http://localhost:8080/logs", {
+  fetch("https://vize-sistemi.onrender.com/logs", {
     headers: { Authorization: `Bearer ${token}` },
   })
     .then((res) => res.json())
@@ -163,7 +163,7 @@ document.getElementById("addUserForm").addEventListener("submit", function (e) {
   const role = document.getElementById("newUserRole").value;
 
   const token = localStorage.getItem("token");
-  fetch("http://localhost:8080/users", {
+  fetch("https://vize-sistemi.onrender.com/users", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

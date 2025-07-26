@@ -6,7 +6,7 @@ $(document).ready(function () {
     const password = $('#password').val();
 
     $.ajax({
-      url: 'http://localhost:8080/login',
+      url: 'https://vize-sistemi.onrender.com/login',
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({ email, password }),

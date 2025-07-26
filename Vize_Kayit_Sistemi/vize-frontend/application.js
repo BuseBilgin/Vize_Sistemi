@@ -15,8 +15,8 @@ document.getElementById("applicationForm").addEventListener("submit", async func
   const updateId = document.getElementById("updateId")?.value;
   const method = updateId ? "PUT" : "POST";
   const endpoint = updateId
-    ? `http://localhost:8080/applications/${updateId}`
-    : "http://localhost:8080/applications";
+    ? `https://vize-sistemi.onrender.com/applications/${updateId}`
+    : "https://vize-sistemi.onrender.com/applications";
 
   const formData = new FormData(form);
 
@@ -51,7 +51,7 @@ function loadApplications() {
   const token = localStorage.getItem("token");
   if (!token) return;
 
-  fetch("http://localhost:8080/applications", {
+  fetch("https://vize-sistemi.onrender.com/applications", {
     headers: { "Authorization": `Bearer ${token}` }
   })
     .then(res => res.json())
@@ -104,7 +104,7 @@ function renderApplications(applications) {
 async function fillFormForUpdate(id) {
   const token = localStorage.getItem("token");
   try {
-    const res = await fetch(`http://localhost:8080/applications/${id}`, {
+    const res = await fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
 
@@ -140,7 +140,7 @@ async function deleteApplication(id) {
   if (!confirm("Bu başvuruyu silmek istediğinizden emin misiniz?")) return;
 
   try {
-    const res = await fetch(`http://localhost:8080/applications/${id}`, {
+    const res = await fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
