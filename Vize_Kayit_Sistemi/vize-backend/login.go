@@ -13,11 +13,10 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-// LoginLog - log kaydı yapısı
+// LoginLog - log kaydı yapısı (email kaldırıldı)
 type LoginLog struct {
 	ID       int    `json:"id"`
 	UserID   int    `json:"user_id"`
-	Email    string `json:"email"`
 	IP       string `json:"ip"`
 	Status   string `json:"status"`
 	UserType string `json:"user_type"`
@@ -40,10 +39,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = DB.QueryRow("SELECT id, password, role FROM users WHERE email = ?", login.Email).
 		Scan(&userID, &storedHash, &role)
 	if err != nil {
-		// Kullanıcı bulunamadıysa logla
-		DB.Exec(`INSERT INTO login_logs (user_id, email, ip, status, user_type)
-		         VALUES (?, ?, ?, ?, ?)`,
-			0, login.Email, r.RemoteAddr, "fail", "unknown")
+		// Kullanıcı bulunamadıysa logla (email loglanmıyor)
+		DB.Exec(`INSERT INTO login_logs (user_id, ip, status, user_type)
+		         VALUES (?, ?, ?, ?)`, 0, r.RemoteAddr, "fail", "unknown")
 		http.Error(w, "Kullanıcı bulunamadı", http.StatusUnauthorized)
 		return
 	}
@@ -51,17 +49,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Şifre doğrulama
 	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(login.Password))
 	if err != nil {
-		DB.Exec(`INSERT INTO login_logs (user_id, email, ip, status, user_type)
-		         VALUES (?, ?, ?, ?, ?)`,
-			userID, login.Email, r.RemoteAddr, "fail", role)
+		DB.Exec(`INSERT INTO login_logs (user_id, ip, status, user_type)
+		         VALUES (?, ?, ?, ?)`, userID, r.RemoteAddr, "fail", role)
 		http.Error(w, "Hatalı şifre", http.StatusUnauthorized)
 		return
 	}
 
 	// Başarılı giriş log kaydı
-	DB.Exec(`INSERT INTO login_logs (user_id, email, ip, status, user_type)
-	         VALUES (?, ?, ?, ?, ?)`,
-		userID, login.Email, r.RemoteAddr, "success", role)
+	DB.Exec(`INSERT INTO login_logs (user_id, ip, status, user_type)
+	         VALUES (?, ?, ?, ?)`, userID, r.RemoteAddr, "success", role)
 
 	// JWT oluştur
 	token, err := GenerateJWT(userID, role)
@@ -87,10 +83,10 @@ func GetLoginLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rows, err := DB.Query(`
-		SELECT id, user_id, email, ip, status, user_type, log_time
+		SELECT id, user_id, ip, status, user_type, log_time
 		FROM login_logs ORDER BY log_time DESC`)
 	if err != nil {
-		http.Error(w, "Loglar alınamadı", http.StatusInternalServerError)
+		http.Error(w, "Loglar alınamadı: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -98,8 +94,7 @@ func GetLoginLogs(w http.ResponseWriter, r *http.Request) {
 	var logs []LoginLog
 	for rows.Next() {
 		var log LoginLog
-		err := rows.Scan(&log.ID, &log.UserID, &log.Email, &log.IP, &log.Status, &log.UserType, &log.LogTime)
-		if err == nil {
+		if err := rows.Scan(&log.ID, &log.UserID, &log.IP, &log.Status, &log.UserType, &log.LogTime); err == nil {
 			logs = append(logs, log)
 		}
 	}
