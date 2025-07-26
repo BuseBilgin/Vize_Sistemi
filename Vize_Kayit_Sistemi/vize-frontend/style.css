@@ -1,0 +1,126 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
+}
+
+/* Arka plan görseli */
+.background {
+  background-image: url('dubai.jpg');
+  background-size: cover;
+  background-position: center;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+/* Siyah yarı saydam overlay */
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+/* Giriş kutusu */
+.login-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 35px;
+  border-radius: 15px;
+  text-align: center;
+  width: 320px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+/* Başlık */
+.login-container h2 {
+  margin-bottom: 20px;
+  color: #222;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* Giriş alanları */
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* Tüm buton ve linkleri ortak stillendir */
+.login-container button,
+.login-container .register-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+  display: inline-block;
+}
+
+/* Giriş Yap butonu - Bordo */
+.login-container button {
+  background-color: #800000;
+  color: white;
+}
+.login-container button:hover {
+  background-color: #5a0000;
+}
+
+/* Kayıt Ol butonu */
+.register-btn {
+  background-color: #6c757d;
+  color: white;
+}
+.register-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Şifremi unuttum */
+.forgot-password {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #333;
+  text-decoration: none;
+}
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* Hatalı giriş mesajı */
+.error-message {
+  color: red;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* Responsive görünüm */
+@media (max-width: 768px) {
+  .login-container {
+    width: 90%;
+    padding: 25px;
+  }
+}
+
+

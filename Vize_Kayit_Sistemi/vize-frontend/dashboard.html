@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Yönetici Paneli</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: url('dubai-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+      background: rgba(255,255,255,0.85);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 0 auto 20px;
+      font-size: 28px;
+    }
+
+    .section {
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    img.preview {
+      max-height: 60px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    img.preview:hover {
+      transform: scale(1.05);
+    }
+
+    button {
+      padding: 6px 12px;
+      margin-right: 6px;
+      border: none;
+      background-color: #8b0000;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #a10000;
+    }
+
+    #logoutBtn {
+      float: right;
+      background: #444;
+    }
+
+    #userRole {
+      color: white;
+      font-weight: bold;
+    }
+
+    input, select {
+      padding: 8px;
+      margin: 4px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    /* 🔥 Modal için eklenen CSS */
+    #imgModal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      text-align: center;
+    }
+
+    #imgModal img {
+      max-width: 90%;
+      max-height: 80%;
+      margin-top: 5%;
+      border: 3px solid white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      animation: zoomIn 0.3s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    #imgModal span {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Yönetici Paneli</h1>
+  <button id="logoutBtn" onclick="logout()">Çıkış Yap</button>
+  <p id="userRole"></p>
+
+  <!-- Başvurular -->
+  <div class="section">
+    <h2>Tüm Başvurular</h2>
+    <table id="applicationsTable">
+      <thead>
+        <tr>
+          <th>Ad</th>
+          <th>Soyad</th>
+          <th>Email</th>
+          <th>Telefon</th>
+          <th>Vize Tipi</th>
+          <th>Giriş</th>
+          <th>Express</th>
+          <th>Sigorta</th>
+          <th>Pasaport</th>
+          <th>Biyometrik</th>
+          <th>Otel Rez.</th>
+          <th>Uçak Bileti</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Kullanıcı Yönetimi -->
+  <div class="section">
+    <h2>Kullanıcı Yönetimi</h2>
+    <form id="addUserForm">
+      <input type="text" id="newUserName" placeholder="Ad Soyad" required />
+      <input type="email" id="newUserEmail" placeholder="Email" required />
+      <input type="password" id="newUserPassword" placeholder="Şifre" required />
+      <select id="newUserRole">
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit">Kullanıcı Ekle</button>
+    </form>
+    <br />
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>Ad</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>İşlem</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Giriş Logları -->
+  <div class="section">
+    <h2>Giriş Logları</h2>
+    <table id="logsTable">
+      <thead>
+        <tr>
+          <th>Kullanıcı ID</th>
+          <th>IP</th>
+          <th>Durum</th>
+          <th>Tip</th>
+          <th>Zaman</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!--  Modal -->
+  <div id="imgModal">
+    <span id="closeModal">&times;</span>
+    <img id="modalImage" src="" alt="Preview">
+  </div>
+
+  <script src="dashboard.js"></script>
+
+  <script>
+    //  Modal JS (resim büyütme)
+    document.addEventListener("click", function(e) {
+      if (e.target.classList.contains("preview")) {
+        const modal = document.getElementById("imgModal");
+        const modalImg = document.getElementById("modalImage");
+        modalImg.src = e.target.src;
+        modal.style.display = "block";
+      }
+    });
+
+    document.getElementById("closeModal").addEventListener("click", function() {
+      document.getElementById("imgModal").style.display = "none";
+    });
+
+    document.getElementById("imgModal").addEventListener("click", function(e) {
+      if (e.target.id === "imgModal") {
+        this.style.display = "none";
+      }
+    });
+  </script>
+
+</body>
+</html>
