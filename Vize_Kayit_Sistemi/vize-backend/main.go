@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings" // ✅ Netlify domain kontrolü için gerekli
 
 	"github.com/gorilla/mux"
 )
@@ -18,8 +19,7 @@ func main() {
 	// uploads klasörünü public olarak sun
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
-	//OPTIONS isteklerine cevap ver (CORS için kritik)
-
+	// OPTIONS isteklerine cevap ver (CORS için kritik)
 	r.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -48,11 +48,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-// CORS middleware – frontend için gerekli
+// ✅ Gelişmiş CORS middleware – tüm Netlify domainlerine izin verir
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin == "https://chipper-alpaca-a890ea.netlify.app" || origin == "http://localhost:3000" {
+		if origin == "http://localhost:3000" || strings.Contains(origin, ".netlify.app") {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
