@@ -31,7 +31,7 @@ $(document).ready(function () {
             localStorage.setItem('role', loginRes.role);
 
             if (loginRes.role === 'admin') {
-              window.location.href = 'dashboard.html';
+              window.location.href = 'applications.html.html';
             } else {
               window.location.href = 'application.html';
             }

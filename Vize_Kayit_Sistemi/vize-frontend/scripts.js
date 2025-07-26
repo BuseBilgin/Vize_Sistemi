@@ -19,7 +19,7 @@ $(document).ready(function () {
 
         // Kullanıcı rolüne göre yönlendirme
         if (response.role === 'admin') {
-          window.location.href = 'dashboard.html';
+          window.location.href = 'applications.html.html';
         } else if (response.role === 'staff') {
           window.location.href = 'application.html';
         } else {
