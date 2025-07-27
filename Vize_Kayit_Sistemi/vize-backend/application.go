@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,12 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"database/sql"
-
 	"github.com/gorilla/mux"
 )
 
-// Application - başvuru veri yapısı
+// Application model
 type Application struct {
 	ID               int    `json:"id"`
 	UserID           int    `json:"user_id"`
@@ -31,7 +30,7 @@ type Application struct {
 	FlightTicket     string `json:"flight_ticket"`
 }
 
-// Yardımcı fonksiyon: dosyayı kaydeder ve adını döner
+// --- Yardımcı: Dosya yükleme ---
 func saveUploadedFile(r *http.Request, fieldName string) (string, error) {
 	file, header, err := r.FormFile(fieldName)
 	if err != nil {
@@ -60,16 +59,16 @@ func saveUploadedFile(r *http.Request, fieldName string) (string, error) {
 	return filename, nil
 }
 
-// CreateApplication - yeni başvuru oluşturur
+// --- Başvuru oluştur ---
 func CreateApplication(w http.ResponseWriter, r *http.Request) {
 	if !isStaff(r) {
-		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
+		http.Error(w, "Yalnızca staff başvuru yapabilir", http.StatusForbidden)
 		return
 	}
 
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
-		http.Error(w, "Form verisi çözümlenemedi", http.StatusBadRequest)
+		http.Error(w, "Form çözümlenemedi", http.StatusBadRequest)
 		return
 	}
 
@@ -105,6 +104,7 @@ func CreateApplication(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Başvuru başarıyla oluşturuldu"))
 }
 
+// --- Tüm başvurular ---
 func GetApplications(w http.ResponseWriter, r *http.Request) {
 	if !isStaff(r) && !isAdmin(r) {
 		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
@@ -115,20 +115,11 @@ func GetApplications(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if isAdmin(r) {
-		//  Admin tüm başvuruları görebilir
-		rows, err = DB.Query(`
-            SELECT id, user_id, ad, soyad, email, telefon, vize_tipi, vize_giris, express, sigorta,
-            passport, biometric_photo, hotel_reservation, flight_ticket
-            FROM applications`)
+		rows, err = DB.Query(`SELECT id,user_id,ad,soyad,email,telefon,vize_tipi,vize_giris,express,sigorta,passport,biometric_photo,hotel_reservation,flight_ticket FROM applications`)
 	} else {
-		// Staff sadece kendi başvurularını görür
 		userID := getUserID(r)
-		rows, err = DB.Query(`
-            SELECT id, user_id, ad, soyad, email, telefon, vize_tipi, vize_giris, express, sigorta,
-            passport, biometric_photo, hotel_reservation, flight_ticket
-            FROM applications WHERE user_id = ?`, userID)
+		rows, err = DB.Query(`SELECT id,user_id,ad,soyad,email,telefon,vize_tipi,vize_giris,express,sigorta,passport,biometric_photo,hotel_reservation,flight_ticket FROM applications WHERE user_id=?`, userID)
 	}
-
 	if err != nil {
 		http.Error(w, "Veriler alınamadı: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -138,25 +129,17 @@ func GetApplications(w http.ResponseWriter, r *http.Request) {
 	var apps []Application
 	for rows.Next() {
 		var app Application
-		err := rows.Scan(&app.ID, &app.UserID, &app.Ad, &app.Soyad, &app.Email, &app.Telefon,
+		rows.Scan(&app.ID, &app.UserID, &app.Ad, &app.Soyad, &app.Email, &app.Telefon,
 			&app.VizeTipi, &app.VizeGiris, &app.Express, &app.Sigorta,
 			&app.Passport, &app.BiometricPhoto, &app.HotelReservation, &app.FlightTicket)
-		if err != nil {
-			http.Error(w, "Satır okunamadı: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
 		apps = append(apps, app)
-	}
-
-	if apps == nil {
-		apps = []Application{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(apps)
 }
 
-// Belirli bir başvuruyu ID ile getir
+// --- Tek başvuru ---
 func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	if !isStaff(r) && !isAdmin(r) {
 		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
@@ -164,10 +147,7 @@ func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := mux.Vars(r)["id"]
-
-	row := DB.QueryRow(`SELECT id, user_id, ad, soyad, email, telefon, vize_tipi, vize_giris, express, sigorta,
-		passport, biometric_photo, hotel_reservation, flight_ticket
-		FROM applications WHERE id = ?`, id)
+	row := DB.QueryRow(`SELECT id,user_id,ad,soyad,email,telefon,vize_tipi,vize_giris,express,sigorta,passport,biometric_photo,hotel_reservation,flight_ticket FROM applications WHERE id=?`, id)
 
 	var app Application
 	err := row.Scan(&app.ID, &app.UserID, &app.Ad, &app.Soyad, &app.Email, &app.Telefon,
@@ -182,23 +162,26 @@ func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(app)
 }
 
-// UpdateApplication - başvuruyu günceller (dosyalar dahil)
+// --- Güncelleme (SADECE Staff kendi başvurusunu güncelleyebilir) ---
 func UpdateApplication(w http.ResponseWriter, r *http.Request) {
+	if isAdmin(r) {
+		http.Error(w, "Admin başvuru güncelleyemez", http.StatusForbidden)
+		return
+	}
 	if !isStaff(r) {
 		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
 		return
 	}
 
+	userID := getUserID(r)
 	id := mux.Vars(r)["id"]
 
-	// Multipart form verisini çözümle
-	err := r.ParseMultipartForm(20 << 20) // 20MB limit
+	err := r.ParseMultipartForm(20 << 20)
 	if err != nil {
-		http.Error(w, "Form verisi çözümlenemedi", http.StatusBadRequest)
+		http.Error(w, "Form çözümlenemedi", http.StatusBadRequest)
 		return
 	}
 
-	// Text alanlarını al
 	ad := r.FormValue("ad")
 	soyad := r.FormValue("soyad")
 	email := r.FormValue("email")
@@ -208,66 +191,63 @@ func UpdateApplication(w http.ResponseWriter, r *http.Request) {
 	express := r.FormValue("express")
 	sigorta := r.FormValue("sigorta")
 
-	// Dosya yüklemelerini işle
-	uploadDir := "./uploads/"
-	passportPath := handleFileUpload(r, "passport", uploadDir)
-	biometricPath := handleFileUpload(r, "biometric_photo", uploadDir)
-	hotelPath := handleFileUpload(r, "hotel_reservation", uploadDir)
-	flightPath := handleFileUpload(r, "flight_ticket", uploadDir)
+	passport := handleFileUpload(r, "passport", "./uploads/")
+	biometric := handleFileUpload(r, "biometric_photo", "./uploads/")
+	hotel := handleFileUpload(r, "hotel_reservation", "./uploads/")
+	flight := handleFileUpload(r, "flight_ticket", "./uploads/")
 
-	//  Veritabanını güncelle (NULL olmayan dosyalar için sadece gelenleri güncelle)
 	_, err = DB.Exec(`
-        UPDATE applications
-        SET ad=?, soyad=?, email=?, telefon=?, vize_tipi=?, vize_giris=?, express=?, sigorta=?,
-            passport=IF(?<>'', ?, passport),
-            biometric_photo=IF(?<>'', ?, biometric_photo),
-            hotel_reservation=IF(?<>'', ?, hotel_reservation),
-            flight_ticket=IF(?<>'', ?, flight_ticket)
-        WHERE id=?`,
+        UPDATE applications SET ad=?, soyad=?, email=?, telefon=?, vize_tipi=?, vize_giris=?, express=?, sigorta=?,
+            passport=IF(?<>'',?,passport),
+            biometric_photo=IF(?<>'',?,biometric_photo),
+            hotel_reservation=IF(?<>'',?,hotel_reservation),
+            flight_ticket=IF(?<>'',?,flight_ticket)
+        WHERE id=? AND user_id=?`,
 		ad, soyad, email, telefon, vizeTipi, vizeGiris, express, sigorta,
-		passportPath, passportPath,
-		biometricPath, biometricPath,
-		hotelPath, hotelPath,
-		flightPath, flightPath,
-		id,
-	)
+		passport, passport, biometric, biometric, hotel, hotel, flight, flight, id, userID)
 
 	if err != nil {
-		http.Error(w, "Veritabanı güncellenemedi: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Güncellenemedi: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Başvuru başarıyla güncellendi"))
+	w.Write([]byte("Başvuru güncellendi"))
 }
 
-// Yardımcı fonksiyon: Dosya yükleme
+// --- Dosya yükleme ---
 func handleFileUpload(r *http.Request, fieldName, uploadDir string) string {
 	file, handler, err := r.FormFile(fieldName)
 	if err != nil {
-		return "" // dosya yüklenmediyse boş döner
+		return ""
 	}
 	defer file.Close()
 
-	filePath := uploadDir + handler.Filename
-	dst, _ := os.Create(filePath)
+	os.MkdirAll(uploadDir, os.ModePerm)
+	path := filepath.Join(uploadDir, handler.Filename)
+	dst, _ := os.Create(path)
 	defer dst.Close()
 	io.Copy(dst, file)
 
-	return filePath
+	return handler.Filename
 }
 
-// DeleteApplication - başvuruyu siler
+// --- Silme (SADECE Staff kendi başvurusunu silebilir) ---
 func DeleteApplication(w http.ResponseWriter, r *http.Request) {
+	if isAdmin(r) {
+		http.Error(w, "Admin başvuru silemez", http.StatusForbidden)
+		return
+	}
 	if !isStaff(r) {
 		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
 		return
 	}
 
+	userID := getUserID(r)
 	id := mux.Vars(r)["id"]
-	_, err := DB.Exec("DELETE FROM applications WHERE id = ?", id)
+
+	_, err := DB.Exec("DELETE FROM applications WHERE id=? AND user_id=?", id, userID)
 	if err != nil {
-		http.Error(w, "Başvuru silinemedi", http.StatusInternalServerError)
+		http.Error(w, "Başvuru silinemedi: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
