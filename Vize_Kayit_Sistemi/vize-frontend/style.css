@@ -5,7 +5,7 @@ body, html {
   height: 100%;
 }
 
-/* 🔹 Arka plan */
+/* Arka plan görseli */
 .background {
   background-image: url('dubai.jpg');
   background-size: cover;
@@ -16,7 +16,7 @@ body, html {
   z-index: -2;
 }
 
-/* 🔹 Siyah overlay */
+/* Siyah yarı saydam overlay */
 .overlay {
   position: absolute;
   top: 0; left: 0;
@@ -26,7 +26,7 @@ body, html {
   z-index: -1;
 }
 
-/* 🔹 Login kutusu */
+/* Giriş kutusu */
 .login-container {
   position: absolute;
   top: 50%;
@@ -38,6 +38,7 @@ body, html {
   text-align: center;
   width: 320px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 2;
 }
 
 /* Başlık */
@@ -48,18 +49,18 @@ body, html {
   font-weight: bold;
 }
 
-/* Input */
+/* Giriş alanları */
 .login-container input {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 14px;
   box-sizing: border-box;
+  font-size: 14px;
 }
 
-/* Butonlar */
+/* Tüm buton ve linkleri ortak stillendir */
 .login-container button,
 .login-container .register-btn {
   width: 100%;
@@ -71,10 +72,13 @@ body, html {
   font-size: 15px;
   cursor: pointer;
   text-align: center;
+  text-decoration: none;
   transition: background 0.3s ease;
+  box-sizing: border-box;
+  display: inline-block;
 }
 
-/* Giriş Yap */
+/* Giriş Yap butonu - Bordo */
 .login-container button {
   background-color: #800000;
   color: white;
@@ -83,7 +87,7 @@ body, html {
   background-color: #5a0000;
 }
 
-/* Kayıt Ol */
+/* Kayıt Ol butonu */
 .register-btn {
   background-color: #6c757d;
   color: white;
@@ -92,28 +96,41 @@ body, html {
   background-color: #5a6268;
 }
 
-/* Hata mesajı */
+/* Şifremi unuttum */
+.forgot-password {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #333;
+  text-decoration: none;
+}
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* Hatalı giriş mesajı */
 .error-message {
   color: red;
   font-size: 13px;
   margin-top: 10px;
 }
 
-/* ✅ Mobil için sadece ufak düzenleme */
+/* ✅ Mobil görünüm için ekstra */
 @media (max-width: 768px) {
   .login-container {
     width: 90%;
-    padding: 30px;
+    max-width: 350px;
+    padding: 25px;
+  }
+  .login-container h2 {
+    font-size: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .login-container {
     width: 95%;
-    padding: 25px;
-  }
-  .login-container h2 {
-    font-size: 20px;
+    padding: 20px;
   }
   .login-container input,
   .login-container button,
