@@ -34,8 +34,8 @@ document.getElementById("applicationForm").addEventListener("submit", async func
     if (res.ok) {
       alert(updateId ? "✅ Başvuru başarıyla güncellendi." : "✅ Başvuru başarıyla eklendi.");
       localStorage.removeItem("editAppId");
-      
-      // ✅ Güncellemeden sonra Başvurularım sayfasına yönlendir + parametre ekle
+
+      // ✅ Güncellemeden sonra Başvurularım sayfasına yönlendir
       window.location.href = "application2.html?updated=true";
     } else {
       const err = await res.text();
@@ -70,6 +70,11 @@ async function fillFormForUpdate(id) {
     document.querySelector('select[name="express"]').value = app.express;
     document.querySelector('select[name="sigorta"]').value = app.sigorta;
     document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
+
+    // ✅ Güncelleme modunda dosya yükleme zorunlu değil
+    document.querySelectorAll('input[type="file"]').forEach(fileInput => {
+      fileInput.removeAttribute("required");
+    });
 
     // ✅ Kullanıcıya güncelleme modunda olduğunu göster
     document.querySelector('button[type="submit"]').textContent = "Güncelle";
