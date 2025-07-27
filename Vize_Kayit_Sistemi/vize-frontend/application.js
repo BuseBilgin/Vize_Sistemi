@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ✅ Başvuru Formu Gönderme
+// ✅ Başvuru Formu Gönderme (Yeni ve Güncelleme)
 document.getElementById("applicationForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -32,11 +32,14 @@ document.getElementById("applicationForm").addEventListener("submit", async func
     });
 
     if (res.ok) {
-      alert(updateId ? "✅ Başvuru güncellendi." : "✅ Başvuru eklendi.");
+      alert(updateId ? "✅ Başvuru başarıyla güncellendi." : "✅ Başvuru başarıyla eklendi.");
       localStorage.removeItem("editAppId");
-      window.location.href = "application2.html"; // Başvurularım sayfasına yönlendir
+      
+      // ✅ Güncellemeden sonra Başvurularım sayfasına yönlendir + parametre ekle
+      window.location.href = "application2.html?updated=true";
     } else {
-      alert("🚫 İşlem başarısız!");
+      const err = await res.text();
+      alert("🚫 İşlem başarısız! " + err);
     }
   } catch (err) {
     console.error(err);
@@ -51,6 +54,12 @@ async function fillFormForUpdate(id) {
     const res = await fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    if (!res.ok) {
+      alert("🚫 Başvuru bilgileri alınamadı!");
+      return;
+    }
+
     const app = await res.json();
 
     document.querySelector('input[name="ad"]').value = app.ad;
@@ -62,7 +71,7 @@ async function fillFormForUpdate(id) {
     document.querySelector('select[name="sigorta"]').value = app.sigorta;
     document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
 
-    // ✅ Dosyalar zaten backend’de, bu yüzden kullanıcı isterse yeni yükleyecek.
+    // ✅ Kullanıcıya güncelleme modunda olduğunu göster
     document.querySelector('button[type="submit"]').textContent = "Güncelle";
   } catch (err) {
     console.error("Form doldurulamadı:", err);

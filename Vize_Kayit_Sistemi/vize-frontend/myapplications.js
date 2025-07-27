@@ -1,5 +1,12 @@
 $(document).ready(function () {
   loadMyApplications();
+
+  // ✅ Eğer güncelleme sonrası geldiyse mesaj göster
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("updated") === "true") {
+    alert("✅ Başvuru başarıyla güncellendi!");
+    history.replaceState(null, "", "application2.html"); // URL’den parametreyi kaldır
+  }
 });
 
 // ✅ Başvurularımı Yükle
@@ -14,7 +21,10 @@ function loadMyApplications() {
   fetch("https://vize-sistemi.onrender.com/applications", {
     headers: { Authorization: `Bearer ${token}` }
   })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("Veri alınamadı");
+      return res.json();
+    })
     .then(data => {
       $("#applicationsTable").DataTable({
         destroy: true,
@@ -30,8 +40,12 @@ function loadMyApplications() {
           {
             data: null,
             render: row => `
-              <button class="btn btn-warning btn-sm" onclick="editApplication(${row.id})"><i class="fas fa-edit"></i> Düzenle</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteApplication(${row.id})"><i class="fas fa-trash"></i> Sil</button>`
+              <button class="btn btn-warning btn-sm" onclick="editApplication(${row.id})">
+                <i class="fas fa-edit"></i> Düzenle
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="deleteApplication(${row.id})">
+                <i class="fas fa-trash"></i> Sil
+              </button>`
           }
         ]
       });
@@ -54,6 +68,11 @@ function deleteApplication(id) {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
   }).then(res => {
-    res.ok ? loadMyApplications() : alert("🚫 Silme başarısız!");
+    if (res.ok) {
+      alert("✅ Başvuru silindi.");
+      loadMyApplications();
+    } else {
+      alert("🚫 Silme başarısız!");
+    }
   });
 }
