@@ -1,7 +1,13 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const editId = localStorage.getItem("editAppId");
+
   if (editId) {
+    // Düzenleme moduna gir
     await fillFormForUpdate(editId);
+  } else {
+    // ✅ Yeni başvuru moduna geçerken güvenlik için temizle
+    localStorage.removeItem("editAppId");
+    document.querySelector('button[type="submit"]').textContent = "Başvur";
   }
 });
 
