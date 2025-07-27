@@ -2,16 +2,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const editId = localStorage.getItem("editAppId");
 
   if (editId) {
-    // Düzenleme moduna gir
     await fillFormForUpdate(editId);
   } else {
-    // ✅ Yeni başvuru moduna geçerken güvenlik için temizle
     localStorage.removeItem("editAppId");
     document.querySelector('button[type="submit"]').textContent = "Başvur";
   }
+
+  // ✅ Dosya önizleme eventleri ekleniyor
+  initFilePreview("passportInput", "passportPreview");
+  initFilePreview("biometricInput", "biometricPreview");
+  initFilePreview("hotelInput", "hotelPreview");
+  initFilePreview("flightInput", "flightPreview");
 });
 
-// ✅ Başvuru Formu Gönderme (Yeni ve Güncelleme)
+// ✅ Başvuru Gönderme
 document.getElementById("applicationForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -40,8 +44,6 @@ document.getElementById("applicationForm").addEventListener("submit", async func
     if (res.ok) {
       alert(updateId ? "✅ Başvuru başarıyla güncellendi." : "✅ Başvuru başarıyla eklendi.");
       localStorage.removeItem("editAppId");
-
-      // ✅ Güncellemeden sonra Başvurularım sayfasına yönlendir
       window.location.href = "application2.html?updated=true";
     } else {
       const err = await res.text();
@@ -53,7 +55,7 @@ document.getElementById("applicationForm").addEventListener("submit", async func
   }
 });
 
-// ✅ Düzenlenecek Başvuru Bilgilerini Formda Göster
+// ✅ Formu Düzenleme Moduna Getir
 async function fillFormForUpdate(id) {
   const token = localStorage.getItem("token");
   try {
@@ -77,14 +79,38 @@ async function fillFormForUpdate(id) {
     document.querySelector('select[name="sigorta"]').value = app.sigorta;
     document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
 
-    // ✅ Güncelleme modunda dosya yükleme zorunlu değil
+    // Güncelleme modunda dosya yükleme zorunlu değil
     document.querySelectorAll('input[type="file"]').forEach(fileInput => {
       fileInput.removeAttribute("required");
     });
 
-    // ✅ Kullanıcıya güncelleme modunda olduğunu göster
     document.querySelector('button[type="submit"]').textContent = "Güncelle";
   } catch (err) {
     console.error("Form doldurulamadı:", err);
   }
+}
+
+// ✅ Dosya Önizleme Fonksiyonu
+function initFilePreview(inputId, previewId) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+
+  if (!input || !preview) return;
+
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.textContent = `📄 ${file.name}`;
+      }
+    } else {
+      preview.textContent = "Henüz dosya seçilmedi";
+    }
+  });
 }
