@@ -1,3 +1,5 @@
+<!--Admin Panel Başvurular Sayfası-->
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -15,7 +17,7 @@
 </head>
 <body>
 
-<!-- ✅ Navbar -->
+<!--  Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="applications.html.html">Admin Panel</a>
@@ -48,7 +50,7 @@
   </table>
 </div>
 
-<!-- ✅ Modal -->
+<!--  Modal -->
 <div id="imgModal"><span id="closeModal">&times;</span><img id="modalImage" src=""></div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -59,7 +61,7 @@
 <script src="applications.js"></script>
 
 <script>
-  // ✅ Modal aç/kapat
+  //  Modal aç/kapat
   document.addEventListener("click", function(e) {
     if (e.target.classList.contains("preview")) {
       document.getElementById("modalImage").src = e.target.src;

@@ -1,7 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
   loadMyApplications();
 });
 
+// ✅ Başvurularımı Yükle
 function loadMyApplications() {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -20,25 +21,39 @@ function loadMyApplications() {
         responsive: true,
         data: data,
         columns: [
-          { data: 'ad' },
-          { data: 'soyad' },
-          { data: 'email' },
-          { data: 'telefon' },
-          { data: 'vize_tipi' },
-          { data: 'vize_giris' },
-          { data: null, render: row => `<button onclick="deleteApplication(${row.id})" class="btn btn-danger btn-sm">Sil</button>` }
+          { data: "ad" },
+          { data: "soyad" },
+          { data: "email" },
+          { data: "telefon" },
+          { data: "vize_tipi" },
+          { data: "vize_giris" },
+          {
+            data: null,
+            render: row => `
+              <button class="btn btn-warning btn-sm" onclick="editApplication(${row.id})"><i class="fas fa-edit"></i> Düzenle</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteApplication(${row.id})"><i class="fas fa-trash"></i> Sil</button>`
+          }
         ]
       });
     })
-    .catch(() => alert("Başvurular alınamadı!"));
+    .catch(() => alert("🚫 Başvurular alınamadı!"));
 }
 
+// ✅ Başvuru Düzenleme → Kullanıcıyı application.html sayfasına yönlendiriyoruz
+function editApplication(id) {
+  localStorage.setItem("editAppId", id); // id’yi saklıyoruz
+  window.location.href = "application.html";
+}
+
+// ✅ Başvuru Silme
 function deleteApplication(id) {
   const token = localStorage.getItem("token");
-  if (!confirm("Başvuruyu silmek istiyor musunuz?")) return;
+  if (!confirm("Bu başvuruyu silmek istiyor musunuz?")) return;
 
   fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
-  }).then(res => res.ok ? loadMyApplications() : alert("Silme başarısız!"));
+  }).then(res => {
+    res.ok ? loadMyApplications() : alert("🚫 Silme başarısız!");
+  });
 }

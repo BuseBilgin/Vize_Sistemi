@@ -7,35 +7,13 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-    header {
-      background: #800000; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white;
-    }
+    header { background: #800000; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
     header nav { display: flex; gap: 10px; align-items: center; }
     header a { color: white; text-decoration: none; font-weight: bold; }
-    
-    /* 🔹 Başvuru Yap Butonu */
-    .apply-btn {
-      background: #4b4b4b;
-      color: #fff;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
-    }
+    .apply-btn { background: #4b4b4b; color: #fff; padding: 6px 14px; border-radius: 6px; font-weight: bold; text-decoration: none; }
     .apply-btn:hover { background: #333; }
-
-    /* 🔹 Çıkış Yap Butonu */
-    .logout-btn {
-      background: #a52a2a;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
-    }
+    .logout-btn { background: #a52a2a; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; }
     .logout-btn:hover { background: #cc3b3b; }
-
-    /* 🔹 Tablo */
     .table-container { background: #fff; padding: 30px; max-width: 1100px; margin: 30px auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
     h2 { text-align: center; color: #800000; margin-bottom: 20px; }
     table.dataTable thead th { background: #800000; color: white; }
@@ -66,7 +44,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="myapplications.js"></script>
-
 <script>
   function logout(){
     localStorage.removeItem("token");

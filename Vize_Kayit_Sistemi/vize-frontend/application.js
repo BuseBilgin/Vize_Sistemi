@@ -1,61 +1,70 @@
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("applicationsList")) loadApplications();
+document.addEventListener("DOMContentLoaded", async () => {
+  const editId = localStorage.getItem("editAppId");
+  if (editId) {
+    await fillFormForUpdate(editId);
+  }
 });
 
-// ✅ Form Gönderme
-document.getElementById("applicationForm")?.addEventListener("submit", async function(e){
+// ✅ Başvuru Formu Gönderme
+document.getElementById("applicationForm").addEventListener("submit", async function (e) {
   e.preventDefault();
+
   const token = localStorage.getItem("token");
-  if(!token){ alert("Giriş yapmalısınız."); return; }
-  const form=e.target;
-  const updateId=document.getElementById("updateId")?.value;
-  const method=updateId?"PUT":"POST";
-  const endpoint=updateId?`https://vize-sistemi.onrender.com/applications/${updateId}`:"https://vize-sistemi.onrender.com/applications";
-  const formData=new FormData(form);
-  try{
-    const res=await fetch(endpoint,{method,headers:{"Authorization":`Bearer ${token}`},body:formData});
-    if(res.ok){ alert(updateId?"Başvuru güncellendi.":"Başvuru eklendi."); form.reset(); loadApplications(); }
-    else alert("Hata: "+await res.text());
-  }catch(err){ alert("Sunucu hatası."); }
+  if (!token) {
+    alert("Giriş yapmalısınız.");
+    return;
+  }
+
+  const form = e.target;
+  const updateId = localStorage.getItem("editAppId");
+  const method = updateId ? "PUT" : "POST";
+  const endpoint = updateId
+    ? `https://vize-sistemi.onrender.com/applications/${updateId}`
+    : "https://vize-sistemi.onrender.com/applications";
+
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch(endpoint, {
+      method,
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    });
+
+    if (res.ok) {
+      alert(updateId ? "✅ Başvuru güncellendi." : "✅ Başvuru eklendi.");
+      localStorage.removeItem("editAppId");
+      window.location.href = "application2.html"; // Başvurularım sayfasına yönlendir
+    } else {
+      alert("🚫 İşlem başarısız!");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("🚫 Sunucuya bağlanılamadı.");
+  }
 });
 
-// ✅ Başvuruları Yükle
-function loadApplications(){
-  const token=localStorage.getItem("token");
-  if(!token)return;
-  fetch("https://vize-sistemi.onrender.com/applications",{headers:{"Authorization":`Bearer ${token}`}})
-    .then(r=>r.json()).then(data=>renderCards(data))
-    .catch(()=>document.getElementById("applicationsList").innerHTML="<p>Veri alınamadı.</p>");
-}
+// ✅ Düzenlenecek Başvuru Bilgilerini Formda Göster
+async function fillFormForUpdate(id) {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const app = await res.json();
 
-// ✅ Kart Görünümünde Render
-function renderCards(data){
-  const container=document.getElementById("applicationsList");
-  container.innerHTML="";
-  if(!data.length){ container.innerHTML="<p>Henüz başvuru yok.</p>"; return; }
-  data.forEach(app=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <p><strong>Ad:</strong> ${app.ad}</p>
-      <p><strong>Soyad:</strong> ${app.soyad}</p>
-      <p><strong>Email:</strong> ${app.email}</p>
-      <p><strong>Telefon:</strong> ${app.telefon}</p>
-      <p><strong>Vize Tipi:</strong> ${app.vize_tipi}</p>
-      <p><strong>Giriş Türü:</strong> ${app.vize_giris}</p>
-      <div class="actions">
-        <button class="edit-btn" onclick="fillFormForUpdate('${app.id}')">✏ Düzenle</button>
-        <button class="delete-btn" onclick="deleteApplication('${app.id}')">🗑 Sil</button>
-      </div>`;
-    container.appendChild(card);
-  });
-}
+    document.querySelector('input[name="ad"]').value = app.ad;
+    document.querySelector('input[name="soyad"]').value = app.soyad;
+    document.querySelector('input[name="email"]').value = app.email;
+    document.querySelector('input[name="telefon"]').value = app.telefon;
+    document.querySelector('select[name="vize_tipi"]').value = app.vize_tipi;
+    document.querySelector('select[name="express"]').value = app.express;
+    document.querySelector('select[name="sigorta"]').value = app.sigorta;
+    document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
 
-// ✅ Silme
-async function deleteApplication(id){
-  const token=localStorage.getItem("token");
-  if(!confirm("Silmek istediğinize emin misiniz?"))return;
-  const res=await fetch(`https://vize-sistemi.onrender.com/applications/${id}`,{method:"DELETE",headers:{"Authorization":`Bearer ${token}`}});
-  if(res.ok){ alert("Başvuru silindi."); loadApplications(); }
-  else alert("Silme hatası.");
+    // ✅ Dosyalar zaten backend’de, bu yüzden kullanıcı isterse yeni yükleyecek.
+    document.querySelector('button[type="submit"]').textContent = "Güncelle";
+  } catch (err) {
+    console.error("Form doldurulamadı:", err);
+  }
 }
