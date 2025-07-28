@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body { font-family:'Poppins',sans-serif; background:#f4f4f4; margin:0; padding:0; }
-    
+
     /* HEADER */
     header { background:#800000; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; color:#fff; position:relative; z-index:10; }
     header nav { display:flex; gap:10px; align-items:center; }
@@ -26,11 +26,15 @@
 
     /* FILE UPLOAD */
     .file-section { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; }
-    .file-box { border:2px dashed #bbb; background:#fafafa; padding:25px; text-align:center; border-radius:10px; cursor:pointer; transition:0.3s; }
+    .file-box { border:2px dashed #bbb; background:#fafafa; padding:20px; text-align:center; border-radius:10px; cursor:pointer; transition:0.3s; position:relative; }
     .file-box:hover { border-color:#800000; background:#fdf5f5; }
     .file-box i { font-size:32px; color:#800000; margin-bottom:8px; display:block; }
-    .file-box span { font-size:15px; color:#333; }
+    .file-box span { font-size:15px; color:#333; display:block; margin-bottom:5px; }
     .file-box input { display:none; }
+
+    /* ✅ Önizleme */
+    .file-preview { margin-top:5px; font-size:14px; color:#555; }
+    .file-preview img { max-width:100%; max-height:100px; border:1px solid #ccc; border-radius:6px; margin-top:5px; }
 
     /* PERSONAL INFO GRID */
     .form-section { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:15px; }
@@ -49,10 +53,7 @@
 
     /* ✅ Mobil Menü */
     @media(max-width:700px){
-      header nav { 
-        display:none; flex-direction:column; position:fixed; top:0; right:0; width:220px; 
-        height:100vh; background:#800000; padding:20px; box-shadow:-3px 0 10px rgba(0,0,0,0.2);
-      }
+      header nav { display:none; flex-direction:column; position:fixed; top:0; right:0; width:220px; height:100vh; background:#800000; padding:20px; box-shadow:-3px 0 10px rgba(0,0,0,0.2); }
       header nav.active { display:flex; }
       .menu-toggle { display:block; }
       header nav a { padding:10px; text-align:left; width:100%; }
@@ -75,10 +76,29 @@
   <form id="applicationForm" enctype="multipart/form-data">
     <div class="section-title">Belgeler</div>
     <div class="file-section">
-      <label class="file-box"><i class="fas fa-plus"></i><span>Pasaport Fotoğrafı</span><input type="file" name="passport" required></label>
-      <label class="file-box"><i class="fas fa-plus"></i><span>Biyometrik Fotoğraf</span><input type="file" name="biometric_photo" required></label>
-      <label class="file-box"><i class="fas fa-plus"></i><span>Otel Rezervasyonu</span><input type="file" name="hotel_reservation" required></label>
-      <label class="file-box"><i class="fas fa-plus"></i><span>Uçak Bileti</span><input type="file" name="flight_ticket" required></label>
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Pasaport Fotoğrafı</span>
+        <input type="file" id="passportInput" name="passport" required>
+        <div id="passportPreview" class="file-preview">Henüz dosya seçilmedi</div>
+      </label>
+
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Biyometrik Fotoğraf</span>
+        <input type="file" id="biometricInput" name="biometric_photo" required>
+        <div id="biometricPreview" class="file-preview">Henüz dosya seçilmedi</div>
+      </label>
+
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Otel Rezervasyonu</span>
+        <input type="file" id="hotelInput" name="hotel_reservation" required>
+        <div id="hotelPreview" class="file-preview">Henüz dosya seçilmedi</div>
+      </label>
+
+      <label class="file-box">
+        <i class="fas fa-plus"></i><span>Uçak Bileti</span>
+        <input type="file" id="flightInput" name="flight_ticket" required>
+        <div id="flightPreview" class="file-preview">Henüz dosya seçilmedi</div>
+      </label>
     </div>
 
     <div class="section-title">Kişisel Bilgiler</div>
@@ -100,6 +120,36 @@
 <script>
 function logout(){ localStorage.removeItem("token"); window.location.href="index.html"; }
 function toggleMenu(){ document.querySelector('header nav').classList.toggle('active'); }
+
+// ✅ Dosya Önizleme Fonksiyonu
+function initFilePreview(inputId, previewId) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  if (!input || !preview) return;
+
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.innerHTML = `<img src="${e.target.result}" alt="preview">`; };
+        reader.readAsDataURL(file);
+      } else {
+        preview.textContent = `📄 ${file.name}`;
+      }
+    } else {
+      preview.textContent = "Henüz dosya seçilmedi";
+    }
+  });
+}
+
+// ✅ Tüm inputlara uygula
+document.addEventListener("DOMContentLoaded", () => {
+  initFilePreview("passportInput", "passportPreview");
+  initFilePreview("biometricInput", "biometricPreview");
+  initFilePreview("hotelInput", "hotelPreview");
+  initFilePreview("flightInput", "flightPreview");
+});
 </script>
 
 </body>
