@@ -174,3 +174,95 @@ func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(app)
 }
+
+// ✅ Başvuru Güncelleme (SADECE Staff kendi başvurusunu güncelleyebilir)
+func UpdateApplication(w http.ResponseWriter, r *http.Request) {
+	if isAdmin(r) {
+		http.Error(w, "Admin başvuru güncelleyemez", http.StatusForbidden)
+		return
+	}
+	if !isStaff(r) {
+		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
+		return
+	}
+
+	userID := getUserID(r)
+	id := mux.Vars(r)["id"]
+
+	err := r.ParseMultipartForm(20 << 20)
+	if err != nil {
+		http.Error(w, "Form çözümlenemedi: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ad := r.FormValue("ad")
+	soyad := r.FormValue("soyad")
+	email := r.FormValue("email")
+	telefon := r.FormValue("telefon")
+	vizeTipi := r.FormValue("vize_tipi")
+	vizeGiris := r.FormValue("vize_giris")
+	express := r.FormValue("express")
+	sigorta := r.FormValue("sigorta")
+
+	passport := handleFileUpload(r, "passport", "./uploads/")
+	biometric := handleFileUpload(r, "biometric_photo", "./uploads/")
+	hotel := handleFileUpload(r, "hotel_reservation", "./uploads/")
+	flight := handleFileUpload(r, "flight_ticket", "./uploads/")
+
+	_, err = DB.Exec(`
+		UPDATE applications SET ad=?, soyad=?, email=?, telefon=?, vize_tipi=?, vize_giris=?, express=?, sigorta=?,
+			passport=IF(?<>'',?,passport),
+			biometric_photo=IF(?<>'',?,biometric_photo),
+			hotel_reservation=IF(?<>'',?,hotel_reservation),
+			flight_ticket=IF(?<>'',?,flight_ticket)
+		WHERE id=? AND user_id=?`,
+		ad, soyad, email, telefon, vizeTipi, vizeGiris, express, sigorta,
+		passport, passport, biometric, biometric, hotel, hotel, flight, flight, id, userID)
+
+	if err != nil {
+		http.Error(w, "Güncellenemedi: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Başvuru güncellendi"))
+}
+
+// ✅ Başvuru Silme (SADECE Staff kendi başvurusunu silebilir)
+func DeleteApplication(w http.ResponseWriter, r *http.Request) {
+	if isAdmin(r) {
+		http.Error(w, "Admin başvuru silemez", http.StatusForbidden)
+		return
+	}
+	if !isStaff(r) {
+		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
+		return
+	}
+
+	userID := getUserID(r)
+	id := mux.Vars(r)["id"]
+
+	_, err := DB.Exec("DELETE FROM applications WHERE id=? AND user_id=?", id, userID)
+	if err != nil {
+		http.Error(w, "Başvuru silinemedi: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Başvuru silindi"))
+}
+
+// ✅ Dosya yükleme yardımcı fonksiyonu
+func handleFileUpload(r *http.Request, fieldName, uploadDir string) string {
+	file, handler, err := r.FormFile(fieldName)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+
+	os.MkdirAll(uploadDir, os.ModePerm)
+	path := filepath.Join(uploadDir, handler.Filename)
+	dst, _ := os.Create(path)
+	defer dst.Close()
+	io.Copy(dst, file)
+
+	return handler.Filename
+}
