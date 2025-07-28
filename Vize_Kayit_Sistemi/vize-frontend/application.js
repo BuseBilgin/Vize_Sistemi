@@ -101,6 +101,28 @@ async function fillFormForUpdate(id) {
     document.querySelector('select[name="sigorta"]').value = app.sigorta || "Yok";
     document.querySelector('select[name="vize_giris"]').value = app.vize_giris || "Tek Giriş";
 
+    // ✅ Mevcut verileri inputlara set ettikten sonra
+if (app.passport) {
+  document.getElementById("passportPreview").innerHTML =
+    `<img src="https://vize-sistemi.onrender.com${app.passport}" style="max-width:100%;border:1px solid #ccc;border-radius:4px;">`;
+}
+
+if (app.biometric_photo) {
+  document.getElementById("biometricPreview").innerHTML =
+    `<img src="https://vize-sistemi.onrender.com${app.biometric_photo}" style="max-width:100%;border:1px solid #ccc;border-radius:4px;">`;
+}
+
+if (app.hotel_reservation) {
+  document.getElementById("hotelPreview").innerHTML =
+    `<img src="https://vize-sistemi.onrender.com${app.hotel_reservation}" style="max-width:100%;border:1px solid #ccc;border-radius:4px;">`;
+}
+
+if (app.flight_ticket) {
+  document.getElementById("flightPreview").innerHTML =
+    `<img src="https://vize-sistemi.onrender.com${app.flight_ticket}" style="max-width:100%;border:1px solid #ccc;border-radius:4px;">`;
+}
+
+
     // ✅ Güncellemede dosya yükleme zorunluluğunu kaldır
     document.querySelectorAll('input[type="file"]').forEach(fileInput => {
       fileInput.removeAttribute("required");
