@@ -85,7 +85,66 @@
   </form>
 </div>
 
-<!-- ✅ Artık sadece application.js yükleniyor -->
-<script src="application.js"></script>
+<script>
+// ✅ Menü ve Logout
+function logout(){ localStorage.removeItem("token"); window.location.href="index.html"; }
+function toggleMenu(){ document.querySelector('header nav').classList.toggle('active'); }
+
+// ✅ Dosya Önizleme
+function initFilePreview(inputId, previewId) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  if (!input || !preview) return;
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.innerHTML = `<img src="${e.target.result}" alt="preview">`; };
+        reader.readAsDataURL(file);
+      } else { preview.textContent = `📄 ${file.name}`; }
+    } else { preview.textContent = "Henüz dosya seçilmedi"; }
+  });
+}
+
+// ✅ Form Gönderme + Debug
+document.getElementById("applicationForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  console.log("📌 [DEBUG] Form gönderiliyor...");
+
+  const token = localStorage.getItem("token");
+  if (!token) { alert("🚫 Giriş yapmalısınız."); return; }
+
+  const formData = new FormData(this);
+  console.log("📤 [DEBUG] FormData:", [...formData.entries()]);
+
+  try {
+    const res = await fetch("https://vize-sistemi.onrender.com/applications", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    });
+
+    console.log("📡 [DEBUG] Status:", res.status);
+    const responseBody = await res.text();
+    console.log("✅ [DEBUG] Yanıt:", responseBody);
+
+    if (res.ok) { alert("✅ Başvuru başarıyla eklendi."); window.location.href = "application2.html"; }
+    else { alert("🚫 Başvuru başarısız! " + responseBody); }
+  } catch (err) {
+    console.error("🔥 [DEBUG] Hata:", err);
+    alert("🚫 Sunucuya bağlanılamadı!");
+  }
+});
+
+// ✅ Önizlemeleri Başlat
+document.addEventListener("DOMContentLoaded", () => {
+  initFilePreview("passportInput", "passportPreview");
+  initFilePreview("biometricInput", "biometricPreview");
+  initFilePreview("hotelInput", "hotelPreview");
+  initFilePreview("flightInput", "flightPreview");
+});
+</script>
+
 </body>
 </html>
