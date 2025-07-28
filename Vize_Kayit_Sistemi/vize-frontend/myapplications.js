@@ -59,7 +59,7 @@ function renderMyApplications(applications) {
 
 function editApplication(id) {
     localStorage.setItem("editAppId", id);
-    window.location.href = "application.html";
+    window.location.href = "application.html?edit=true";
 }
 
 function deleteApplication(id) {

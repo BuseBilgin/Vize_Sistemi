@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("✅ JS yüklendi, DOM hazır.");
 
-  const editId = localStorage.getItem("editAppId");
-  if (editId) {
-    await fillFormForUpdate(editId);
+  const urlParams = new URLSearchParams(window.location.search);
+  const isEditMode = localStorage.getItem("editAppId") && urlParams.get("edit") === "true";
+
+  if (isEditMode) {
+    await fillFormForUpdate(localStorage.getItem("editAppId"));
   } else {
-    const btn = document.querySelector('button[type="submit"]');
-    if (btn) btn.textContent = "Başvur";
+    // ✅ Edit modu değilse localStorage temizlensin
+    localStorage.removeItem("editAppId");
+    document.querySelector('button[type="submit"]').textContent = "Başvur";
   }
 
   initFilePreview("passportInput", "passportPreview");
