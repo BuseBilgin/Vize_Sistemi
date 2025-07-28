@@ -1,17 +1,14 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("✅ JS yüklendi, DOM hazır.");
-
   const editId = localStorage.getItem("editAppId");
 
   if (editId) {
     await fillFormForUpdate(editId);
   } else {
     localStorage.removeItem("editAppId");
-    const btn = document.querySelector('button[type="submit"]');
-    if (btn) btn.textContent = "Başvur";
+    document.querySelector('button[type="submit"]').textContent = "Başvur";
   }
 
-  // ✅ Dosya önizleme eventleri
+  // ✅ Dosya önizleme eventleri ekleniyor
   initFilePreview("passportInput", "passportPreview");
   initFilePreview("biometricInput", "biometricPreview");
   initFilePreview("hotelInput", "hotelPreview");
@@ -22,11 +19,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.getElementById("applicationForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  console.log("📌 Submit event tetiklendi");
-
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("🚫 Giriş yapmalısınız.");
+    alert("Giriş yapmalısınız.");
     return;
   }
 
@@ -39,12 +34,6 @@ document.getElementById("applicationForm").addEventListener("submit", async func
 
   const formData = new FormData(form);
 
-  // ✅ Debug
-  console.log("📤 Gönderilen FormData:");
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-  }
-
   try {
     const res = await fetch(endpoint, {
       method,
@@ -52,27 +41,17 @@ document.getElementById("applicationForm").addEventListener("submit", async func
       body: formData
     });
 
-    console.log("📡 HTTP Status:", res.status);
-
-    let responseBody;
-    try {
-      responseBody = await res.json();
-    } catch {
-      responseBody = await res.text();
-    }
-
-    console.log("✅ Sunucu Yanıtı:", responseBody);
-
     if (res.ok) {
       alert(updateId ? "✅ Başvuru başarıyla güncellendi." : "✅ Başvuru başarıyla eklendi.");
       localStorage.removeItem("editAppId");
       window.location.href = "application2.html?updated=true";
     } else {
-      alert(`🚫 İşlem başarısız! Sunucu yanıtı: ${JSON.stringify(responseBody)}`);
+      const err = await res.text();
+      alert("🚫 İşlem başarısız! " + err);
     }
   } catch (err) {
-    console.error("🚫 Fetch Hatası:", err);
-    alert("🚫 Sunucuya bağlanılamadı. Konsolu kontrol edin.");
+    console.error(err);
+    alert("🚫 Sunucuya bağlanılamadı.");
   }
 });
 
@@ -90,25 +69,24 @@ async function fillFormForUpdate(id) {
     }
 
     const app = await res.json();
-    console.log("🟢 Güncellenecek Başvuru:", app);
 
-    document.querySelector('input[name="ad"]').value = app.ad || "";
-    document.querySelector('input[name="soyad"]').value = app.soyad || "";
-    document.querySelector('input[name="email"]').value = app.email || "";
-    document.querySelector('input[name="telefon"]').value = app.telefon || "";
-    document.querySelector('select[name="vize_tipi"]').value = app.vize_tipi || "30 Gün";
-    document.querySelector('select[name="express"]').value = app.express || "Hayır";
-    document.querySelector('select[name="sigorta"]').value = app.sigorta || "Yok";
-    document.querySelector('select[name="vize_giris"]').value = app.vize_giris || "Tek Giriş";
+    document.querySelector('input[name="ad"]').value = app.ad;
+    document.querySelector('input[name="soyad"]').value = app.soyad;
+    document.querySelector('input[name="email"]').value = app.email;
+    document.querySelector('input[name="telefon"]').value = app.telefon;
+    document.querySelector('select[name="vize_tipi"]').value = app.vize_tipi;
+    document.querySelector('select[name="express"]').value = app.express;
+    document.querySelector('select[name="sigorta"]').value = app.sigorta;
+    document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
 
-    // ✅ Güncellemede dosya yükleme zorunluluğunu kaldır
+    // Güncelleme modunda dosya yükleme zorunlu değil
     document.querySelectorAll('input[type="file"]').forEach(fileInput => {
       fileInput.removeAttribute("required");
     });
 
     document.querySelector('button[type="submit"]').textContent = "Güncelle";
   } catch (err) {
-    console.error("🚫 Form doldurulamadı:", err);
+    console.error("Form doldurulamadı:", err);
   }
 }
 
@@ -117,10 +95,7 @@ function initFilePreview(inputId, previewId) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
 
-  if (!input || !preview) {
-    console.warn(`⚠️ Önizleme için ID bulunamadı: ${inputId}, ${previewId}`);
-    return;
-  }
+  if (!input || !preview) return;
 
   input.addEventListener("change", () => {
     const file = input.files[0];
@@ -128,7 +103,7 @@ function initFilePreview(inputId, previewId) {
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = e => {
-          preview.innerHTML = `<img src="${e.target.result}" alt="preview" style="max-width:100%;border:1px solid #ccc;border-radius:4px;">`;
+          preview.innerHTML = `<img src="${e.target.result}" alt="preview">`;
         };
         reader.readAsDataURL(file);
       } else {
