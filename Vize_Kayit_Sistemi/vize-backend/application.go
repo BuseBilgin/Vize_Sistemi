@@ -189,14 +189,85 @@ func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(app)
 }
 
-// --- Başvuru Güncelleme (Boş) ---
+// --- Başvuru Güncelleme ---
 func UpdateApplication(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("⚠️ UpdateApplication çağrıldı ancak uygulanmadı")
-	http.Error(w, "UpdateApplication uygulanmadı", http.StatusNotImplemented)
+	fmt.Println("🚀 UpdateApplication çağrıldı")
+	if !isStaff(r) && !isAdmin(r) {
+		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
+		return
+	}
+
+	id := mux.Vars(r)["id"]
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		http.Error(w, "Form çözümlenemedi: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	app := Application{
+		Ad:        r.FormValue("ad"),
+		Soyad:     r.FormValue("soyad"),
+		Email:     r.FormValue("email"),
+		Telefon:   r.FormValue("telefon"),
+		VizeTipi:  r.FormValue("vize_tipi"),
+		VizeGiris: r.FormValue("vize_giris"),
+		Express:   r.FormValue("express"),
+		Sigorta:   r.FormValue("sigorta"),
+	}
+
+	// ✅ Dosya yükleme (varsa güncellenecek)
+	passport, _ := saveUploadedFile(r, "passport")
+	if passport != "" {
+		app.Passport = passport
+	}
+	biometric, _ := saveUploadedFile(r, "biometric_photo")
+	if biometric != "" {
+		app.BiometricPhoto = biometric
+	}
+	hotel, _ := saveUploadedFile(r, "hotel_reservation")
+	if hotel != "" {
+		app.HotelReservation = hotel
+	}
+	flight, _ := saveUploadedFile(r, "flight_ticket")
+	if flight != "" {
+		app.FlightTicket = flight
+	}
+
+	_, err = DB.Exec(`UPDATE applications SET ad=?, soyad=?, email=?, telefon=?, vize_tipi=?, vize_giris=?, express=?, sigorta=?, 
+        passport=IFNULL(NULLIF(?,''), passport), 
+        biometric_photo=IFNULL(NULLIF(?,''), biometric_photo), 
+        hotel_reservation=IFNULL(NULLIF(?,''), hotel_reservation), 
+        flight_ticket=IFNULL(NULLIF(?,''), flight_ticket) 
+        WHERE id=?`,
+		app.Ad, app.Soyad, app.Email, app.Telefon, app.VizeTipi, app.VizeGiris, app.Express, app.Sigorta,
+		app.Passport, app.BiometricPhoto, app.HotelReservation, app.FlightTicket, id)
+
+	if err != nil {
+		http.Error(w, "Güncelleme başarısız: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("✅ Başvuru güncellendi ID:", id)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Başvuru başarıyla güncellendi"))
 }
 
-// --- Başvuru Silme (Boş) ---
+// --- Başvuru Silme ---
 func DeleteApplication(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("⚠️ DeleteApplication çağrıldı ancak uygulanmadı")
-	http.Error(w, "DeleteApplication uygulanmadı", http.StatusNotImplemented)
+	fmt.Println("🚀 DeleteApplication çağrıldı")
+	if !isStaff(r) && !isAdmin(r) {
+		http.Error(w, "Yetkisiz erişim", http.StatusForbidden)
+		return
+	}
+
+	id := mux.Vars(r)["id"]
+	_, err := DB.Exec("DELETE FROM applications WHERE id=?", id)
+	if err != nil {
+		http.Error(w, "Silme başarısız: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("✅ Başvuru silindi ID:", id)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Başvuru silindi"))
 }
