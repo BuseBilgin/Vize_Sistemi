@@ -5,20 +5,37 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadMyApplications() {
     const token = localStorage.getItem("token");
     if (!token) {
-        alert("Giriş yapmalısınız.");
+        alert("🚫 Giriş yapmalısınız.");
         return;
     }
 
     fetch("https://vize-sistemi.onrender.com/applications", {
         headers: { "Authorization": `Bearer ${token}` }
     })
-        .then(res => res.json())
-        .then(data => renderMyApplications(data))
-        .catch(err => console.error("Başvurular alınamadı:", err));
+    .then(res => {
+        console.log("📡 API Yanıt Kodu:", res.status);
+        if (!res.ok) {
+            return res.text().then(text => { 
+                throw new Error("Sunucu Hatası: " + text); 
+            });
+        }
+        return res.json();
+    })
+    .then(data => {
+        console.log("📌 API'den Gelen Başvurular:", data);
+        if (!Array.isArray(data) || data.length === 0) {
+            alert("⚠️ Henüz başvuru bulunamadı.");
+        }
+        renderMyApplications(data);
+    })
+    .catch(err => {
+        console.error("❌ Başvurular alınamadı:", err);
+        alert("🚫 Başvurular yüklenirken hata oluştu: " + err.message);
+    });
 }
 
 function renderMyApplications(applications) {
-    const table = $('#applicationsTable').DataTable({
+    $('#applicationsTable').DataTable({
         destroy: true,
         responsive: true,
         data: applications,
@@ -40,13 +57,11 @@ function renderMyApplications(applications) {
     });
 }
 
-// ✅ Düzenleme fonksiyonu
 function editApplication(id) {
     localStorage.setItem("editAppId", id);
     window.location.href = "application.html";
 }
 
-// ✅ Silme fonksiyonu
 function deleteApplication(id) {
     if (!confirm("Bu başvuruyu silmek istediğinize emin misiniz?")) return;
 
@@ -55,12 +70,16 @@ function deleteApplication(id) {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
     })
-        .then(res => {
-            if (res.ok) {
-                alert("✅ Başvuru silindi");
-                loadMyApplications();
-            } else {
-                alert("🚫 Silme hatası");
-            }
-        });
+    .then(res => {
+        if (res.ok) {
+            alert("✅ Başvuru silindi");
+            loadMyApplications();
+        } else {
+            return res.text().then(t => { throw new Error(t); });
+        }
+    })
+    .catch(err => {
+        console.error("❌ Silme hatası:", err);
+        alert("🚫 Silme sırasında hata: " + err.message);
+    });
 }
