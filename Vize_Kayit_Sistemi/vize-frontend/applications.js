@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadApplications();
 });
 
+// ✅ Başvuruları yükle
 function loadApplications() {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -40,6 +41,7 @@ function loadApplications() {
         });
 }
 
+// ✅ Başvuruları tabloya bas
 function renderApplications(applications) {
     console.log("🟢 Tabloya işlenecek başvuru sayısı:", applications.length);
 
@@ -71,7 +73,41 @@ function renderApplications(applications) {
             {
                 data: 'flight_ticket',
                 render: d => d ? `<img src="https://vize-sistemi.onrender.com${d}" class="preview">` : '—'
+            },
+            {
+                data: 'id',
+                render: id => `
+                    <button class="edit-btn" onclick="editApplication(${id})">✏️ Düzenle</button>
+                    <button class="delete-btn" onclick="deleteApplication(${id})">🗑️ Sil</button>
+                `
             }
         ]
     });
+}
+
+// ✅ Düzenleme Fonksiyonu
+function editApplication(id) {
+    console.log("✏️ Düzenlenecek başvuru ID:", id);
+    localStorage.setItem("editAppId", id);
+    window.location.href = "application.html?edit=true";
+}
+
+// ✅ Silme Fonksiyonu
+function deleteApplication(id) {
+    if (!confirm("❗ Bu başvuruyu silmek istediğinize emin misiniz?")) return;
+
+    const token = localStorage.getItem("token");
+    fetch(`https://vize-sistemi.onrender.com/applications/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+        .then(res => {
+            if (res.ok) {
+                alert("✅ Başvuru silindi.");
+                loadApplications(); // tabloyu yenile
+            } else {
+                alert("🚫 Silme başarısız!");
+            }
+        })
+        .catch(err => console.error("🔥 Silme hatası:", err));
 }
