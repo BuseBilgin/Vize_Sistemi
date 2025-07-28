@@ -188,3 +188,15 @@ func GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(app)
 }
+
+// --- Başvuru Güncelleme (Boş) ---
+func UpdateApplication(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("⚠️ UpdateApplication çağrıldı ancak uygulanmadı")
+	http.Error(w, "UpdateApplication uygulanmadı", http.StatusNotImplemented)
+}
+
+// --- Başvuru Silme (Boş) ---
+func DeleteApplication(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("⚠️ DeleteApplication çağrıldı ancak uygulanmadı")
+	http.Error(w, "DeleteApplication uygulanmadı", http.StatusNotImplemented)
+}
