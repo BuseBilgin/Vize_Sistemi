@@ -6,23 +6,22 @@
   <title>Başvurularım</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-    header {
-      background: #800000; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; flex-wrap: wrap;
-    }
+
+    /* HEADER */
+    header { background: #800000; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; flex-wrap: wrap; }
     header nav { display: flex; gap: 10px; align-items: center; }
     header a { color: white; text-decoration: none; font-weight: bold; }
 
-    /* 🔹 Başvuru Yap Butonu */
-    .apply-btn { background: #4b4b4b; color: #fff; padding: 6px 14px; border-radius: 6px; font-weight: bold; text-decoration: none; }
+    /* BUTTONS */
+    .apply-btn { background: #4b4b4b; color: #fff; padding: 8px 16px; border-radius: 6px; font-weight: bold; text-decoration: none; }
     .apply-btn:hover { background: #333; }
-
-    /* 🔹 Çıkış Yap Butonu */
-    .logout-btn { background: #a52a2a; color: #fff; padding: 6px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; }
+    .logout-btn { background: #a52a2a; color: #fff; padding: 8px 14px; border-radius: 6px; font-weight: bold; text-decoration: none; }
     .logout-btn:hover { background: #cc3b3b; }
 
-    /* 🔹 Tablo */
+    /* TABLE */
     .table-container { background: #fff; padding: 30px; max-width: 1100px; margin: 30px auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); overflow-x: auto; }
     h2 { text-align: center; color: #800000; margin-bottom: 20px; }
     table.dataTable thead th { background: #800000; color: white; }
@@ -30,11 +29,29 @@
     /* ✅ Mobil uyum */
     @media(max-width:768px){
       header { flex-direction: column; align-items: flex-start; }
-      header nav { flex-direction: column; width: 100%; gap: 5px; margin-top: 10px; }
+      header nav { flex-direction: column; width: 100%; gap: 6px; margin-top: 10px; }
       .table-container { width: 95%; padding: 15px; }
       table { font-size: 14px; }
-      table.dataTable thead { font-size: 13px; }
       .apply-btn, .logout-btn { width: 100%; text-align: center; }
+    }
+
+    /* ✅ Çok küçük ekranlar */
+    @media(max-width:480px){
+      table { font-size: 13px; }
+      h2 { font-size: 20px; }
+      .apply-btn, .logout-btn { font-size: 14px; padding: 7px 10px; }
+    }
+
+    /* ✅ Kart görünümü için (dar ekran) */
+    @media(max-width:768px){
+      table.dataTable tbody tr { display: block; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; padding: 8px; }
+      table.dataTable tbody tr td { display: block; text-align: left; border: none !important; padding: 5px 8px; }
+      table.dataTable tbody tr td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        color: #800000;
+      }
     }
   </style>
 </head>
@@ -50,7 +67,7 @@
 
 <div class="table-container">
   <h2>Başvurularım</h2>
-  <table id="applicationsTable" class="display" style="width:100%">
+  <table id="applicationsTable" class="display nowrap" style="width:100%">
     <thead>
       <tr>
         <th>Ad</th><th>Soyad</th><th>Email</th><th>Telefon</th><th>Vize Tipi</th><th>Giriş</th><th>İşlem</th>
@@ -62,12 +79,27 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="myapplications.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
 <script>
+  $(document).ready(function(){
+    $('#applicationsTable').DataTable({
+      responsive: true,
+      autoWidth: false,
+      createdRow: function(row, data, dataIndex) {
+        $('td', row).each(function(index) {
+          const header = $('#applicationsTable thead th').eq(index).text();
+          $(this).attr('data-label', header);
+        });
+      }
+    });
+  });
+
   function logout(){
     localStorage.removeItem("token");
     window.location.href = "index.html";
   }
 </script>
+<script src="myapplications.js"></script>
+
 </body>
 </html>

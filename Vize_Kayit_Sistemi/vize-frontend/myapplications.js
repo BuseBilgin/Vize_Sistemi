@@ -29,6 +29,7 @@ function loadMyApplications() {
       $("#applicationsTable").DataTable({
         destroy: true,
         responsive: true,
+        autoWidth: false,
         data: data,
         columns: [
           { data: "ad" },
@@ -47,7 +48,15 @@ function loadMyApplications() {
                 <i class="fas fa-trash"></i> Sil
               </button>`
           }
-        ]
+        ],
+
+        // ✅ Mobilde kart görünümü için data-label ekle
+        createdRow: function (row, data, dataIndex) {
+          $('td', row).each(function (index) {
+            const header = $('#applicationsTable thead th').eq(index).text();
+            $(this).attr('data-label', header);
+          });
+        }
       });
     })
     .catch(() => alert("🚫 Başvurular alınamadı!"));

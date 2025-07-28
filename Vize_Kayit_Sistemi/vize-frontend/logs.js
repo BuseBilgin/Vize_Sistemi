@@ -14,6 +14,7 @@ $(document).ready(function () {
       $('#logsTable').DataTable({
         destroy: true,
         responsive: true,
+        autoWidth: false, // ✅ Mobil uyumu iyileştir
         data: data,
         columns: [
           { data: 'user_id' },
@@ -21,7 +22,15 @@ $(document).ready(function () {
           { data: 'status' },
           { data: 'user_type' },
           { data: 'log_time' }
-        ]
+        ],
+
+        // ✅ Mobilde her hücreye başlık ekle (kart görünümü için)
+        createdRow: function (row, rowData, dataIndex) {
+          $('td', row).each(function (index) {
+            const header = $('#logsTable thead th').eq(index).text();
+            $(this).attr('data-label', header);
+          });
+        }
       });
     })
     .catch(err => {
