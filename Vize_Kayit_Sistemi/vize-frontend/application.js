@@ -21,7 +21,7 @@ document.getElementById("applicationForm").addEventListener("submit", async func
 
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("Giriş yapmalısınız.");
+    alert("🚫 Giriş yapmalısınız.");
     return;
   }
 
@@ -34,6 +34,12 @@ document.getElementById("applicationForm").addEventListener("submit", async func
 
   const formData = new FormData(form);
 
+  // ✅ Debug: Gönderilen form verilerini logla
+  console.log("📤 Gönderilen Form Verileri:");
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}:`, value);
+  }
+
   try {
     const res = await fetch(endpoint, {
       method,
@@ -41,17 +47,19 @@ document.getElementById("applicationForm").addEventListener("submit", async func
       body: formData
     });
 
+    const responseText = await res.text();
+    console.log("✅ Sunucu Yanıtı:", responseText);
+
     if (res.ok) {
       alert(updateId ? "✅ Başvuru başarıyla güncellendi." : "✅ Başvuru başarıyla eklendi.");
       localStorage.removeItem("editAppId");
       window.location.href = "application2.html?updated=true";
     } else {
-      const err = await res.text();
-      alert("🚫 İşlem başarısız! " + err);
+      alert(`🚫 İşlem başarısız! Sunucu yanıtı: ${responseText}`);
     }
   } catch (err) {
-    console.error(err);
-    alert("🚫 Sunucuya bağlanılamadı.");
+    console.error("🚫 Fetch Hatası:", err);
+    alert("🚫 Sunucuya bağlanılamadı. Detay için konsolu kontrol edin.");
   }
 });
 
@@ -69,6 +77,7 @@ async function fillFormForUpdate(id) {
     }
 
     const app = await res.json();
+    console.log("🟢 Güncellenecek Başvuru:", app);
 
     document.querySelector('input[name="ad"]').value = app.ad;
     document.querySelector('input[name="soyad"]').value = app.soyad;
@@ -79,14 +88,14 @@ async function fillFormForUpdate(id) {
     document.querySelector('select[name="sigorta"]').value = app.sigorta;
     document.querySelector('select[name="vize_giris"]').value = app.vize_giris;
 
-    // Güncelleme modunda dosya yükleme zorunlu değil
+    // ✅ Güncelleme modunda dosya yükleme zorunlu değil
     document.querySelectorAll('input[type="file"]').forEach(fileInput => {
       fileInput.removeAttribute("required");
     });
 
     document.querySelector('button[type="submit"]').textContent = "Güncelle";
   } catch (err) {
-    console.error("Form doldurulamadı:", err);
+    console.error("🚫 Form doldurulamadı:", err);
   }
 }
 
